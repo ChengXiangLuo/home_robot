@@ -1,7 +1,7 @@
 #ifndef __CARMOTOR_H__
 #define __CARMOTOR_H__
 #include "main.h"
-#define k_V2PWM 100
+#define k_V2PWM 130
 
 void CarMotor_init(void);
 void Frontal_Right_run2forward(uint16_t pwm);

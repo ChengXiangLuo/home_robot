@@ -58,8 +58,34 @@ void SystemClock_Config(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-//uint8_t aRxBuffer[2];
-//uint8_t RxBuffer[30];
+/**
+ * @brief  运行主函数
+ * @param  无
+ * @retval 无
+ */
+void run(void)
+{
+	HAL_Delay(100);
+	// 判断当前用户选择的功能，并给树莓派发送
+	switch(Page_temp)	
+	{
+		case PageFeatures:
+			u1_printf("page:0");
+			break;
+		case PagePcCtl:
+			u1_printf("page:1");
+			break;
+		case PageTalk:
+			u1_printf("page:2");
+			break;
+		case PageWatch:
+			u1_printf("page:3");
+			break;
+		case PageDoctor:
+			u1_printf("page:4");
+			break;
+	}
+}
 
 /* USER CODE END 0 */
 
@@ -78,7 +104,7 @@ int main(void)
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
 
-  /* USER CODE BEGIN Init */	
+  /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
 
@@ -98,9 +124,9 @@ int main(void)
   MX_TIM4_Init();
   MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
-	transmit2pi_uart_init();
+	my_uart_init();
 	CarMotor_init();
-	AC_init();
+	ArmCam_init();
 
   /* USER CODE END 2 */
 
@@ -109,7 +135,7 @@ int main(void)
     while (1)
     {                    
     /* USER CODE END WHILE */
-
+			run();
     /* USER CODE BEGIN 3 */
     }
   /* USER CODE END 3 */

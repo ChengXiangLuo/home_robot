@@ -10,12 +10,13 @@
 #include "stdio.h"
 #include "CarMotor.h"
 #include "ArmCamera.h"
-
 uint8_t aRxBuffer;
 uint8_t RxBuffer[30];//接收缓存
 
+uint8_t aRxBuffer_u2;
+uint8_t RxBuffer_u2[30];//uart2接收缓存
 
-
+uint8_t Page_temp; //串口屏此时页面 
 /**
  * @brief  小数转换成八位二进制数，小数精度0.1，范围±7.0
  * @param  num:要转化的数字
@@ -97,9 +98,12 @@ uint16_t angle_b2d(uint8_t bin)
  * @param 	无
  * @retval	无
  */
-void transmit2pi_uart_init(void)
+void my_uart_init(void)
 {
 	HAL_UART_Receive_IT(&huart1, (uint8_t *)&aRxBuffer, 1);
+	HAL_UART_Receive_IT(&huart2, (uint8_t *)&aRxBuffer_u2, 1);
+	//给串口屏发初始化命令，防止上电时串口杂波影响
+	u2_printf("\x00\xff\xff\xff");
 }
 
 /**
@@ -109,7 +113,7 @@ void transmit2pi_uart_init(void)
  */
 void dataFromPi_process(uint8_t *data)
 {
-	char tx_text[20];
+//	char tx_text[20];
 	float velocity_x, velocity_y, velocity_z;
 	float joint1_angle,joint2_angle;
 	
@@ -122,8 +126,8 @@ void dataFromPi_process(uint8_t *data)
 		velocity_x = velocity_b2f(data[k+1]);
 		velocity_y = velocity_b2f(data[k+2]);
 		velocity_z = velocity_b2f(data[k+3]);
-		sprintf(tx_text,"x:%.2f,y:%.2f,z:%.2f\r\n",velocity_x,velocity_y,velocity_z);
-		u1_printf((uint8_t *)tx_text);	
+//		sprintf(tx_text,"x:%.2f,y:%.2f,z:%.2f\r\n",velocity_x,velocity_y,velocity_z);
+//		u1_printf((uint8_t *)tx_text);	
 		if(velocity_z==0)
 		{
 			if(velocity_x==0)
@@ -170,11 +174,51 @@ void dataFromPi_process(uint8_t *data)
 	{
 		joint1_angle = angle_b2d(data[k+1]);
 		joint2_angle = angle_b2d(data[k+2]);
-		sprintf(tx_text,"j1:%.2f,j2:%.2f\r\n",joint1_angle,joint2_angle);
-		u1_printf((uint8_t *)tx_text);
-		
+//		sprintf(tx_text,"j1:%.2f,j2:%.2f\r\n",joint1_angle,joint2_angle);
+//		u1_printf((uint8_t *)tx_text);
 		joint1_cmd(joint1_angle);		
 		joint2_cmd(joint2_angle);
+	}
+	else if(data[k]==0x03)
+	{
+		u2_printf("page features\xff\xff\xff");
+		Page_temp=0;
+	}
+}
+
+/**
+ * @brief 处理串口屏发来的数据
+ * @param data：格式 {0x00},00返回，01电脑控制，02语音聊天，03监护，04看诊
+ * @retval 无
+ */
+void dataFromHMI_process(uint8_t *data)
+{
+	uint8_t k=0;
+	while(RxBuffer_u2[k++]!='{');
+	if(data[k]==0x00)
+	{
+		Page_temp=0;
+		u2_printf("page features\xff\xff\xff");
+	}
+	else if(data[k]==0x01)
+	{
+		Page_temp=1;
+		u2_printf("page page_PCctl\xff\xff\xff");
+	}
+	else if(data[k]==0x02)
+	{
+		Page_temp=2;
+		u2_printf("page page_Talk\xff\xff\xff");
+	}
+	else if(data[k]==0x03)
+	{
+		Page_temp=3;
+		u2_printf("page page_Watch\xff\xff\xff");
+	}
+	else if(data[k]==0x04)
+	{
+		Page_temp=4;
+		u2_printf("page page_Doctor\xff\xff\xff");
 	}
 }
 
@@ -186,9 +230,8 @@ void dataFromPi_process(uint8_t *data)
 void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     static uint8_t Uart1_Rx_Cnt = 0;
+		static uint8_t Uart2_Rx_Cnt = 0;
 		
-
-	
     if (huart == &huart1)
     {
         RxBuffer[++Uart1_Rx_Cnt] = aRxBuffer;   
@@ -201,9 +244,23 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
           memset(RxBuffer, 0x00, sizeof(RxBuffer)); 
 					Uart1_Rx_Cnt = 0;
 				}
-
 				
 				HAL_UART_Receive_IT(&huart1, (uint8_t *)&aRxBuffer, 1);
+    }
+		
+		else if (huart == &huart2)
+    {
+        RxBuffer_u2[++Uart2_Rx_Cnt] = aRxBuffer_u2;   
+				if(RxBuffer_u2[Uart2_Rx_Cnt] == 0x7D)//收到结束符号
+				{
+					dataFromHMI_process(RxBuffer_u2);
+					
+					//清零计数和接收缓存
+          memset(RxBuffer_u2, 0x00, sizeof(RxBuffer_u2)); 
+					Uart2_Rx_Cnt = 0;
+				}
+
+				HAL_UART_Receive_IT(&huart2, (uint8_t *)&aRxBuffer_u2, 1);
     }
 }
 

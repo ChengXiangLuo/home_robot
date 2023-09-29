@@ -16,7 +16,7 @@
  * @param нч
  * @retval нч
  */
-void AC_init(void)
+void ArmCam_init(void)
 {
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_1);
 	HAL_TIM_PWM_Start(&htim2,TIM_CHANNEL_2);
@@ -33,8 +33,11 @@ void AC_init(void)
 void joint1_cmd(int16_t angle)
 {
 	int16_t pwm=0;
-	pwm = angle*180/(full_pwm-zero_pwm)+zero_pwm;
-	__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_1,pwm);
+	if(angle>0 && angle<150)
+	{
+		pwm = angle*180/(full_pwm-zero_pwm)+zero_pwm;
+		__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_1,pwm);
+	}
 }
 
 /**
@@ -45,6 +48,9 @@ void joint1_cmd(int16_t angle)
 void joint2_cmd(int16_t angle)
 {
 	int16_t pwm=0;
-	pwm = angle*180/(full_pwm-zero_pwm)+zero_pwm;
-	__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_2,pwm);
+	if(angle>0 && angle<150)
+	{
+		pwm = angle*180/(full_pwm-zero_pwm)+zero_pwm;
+		__HAL_TIM_SetCompare(&htim2,TIM_CHANNEL_2,pwm);
+	}
 }

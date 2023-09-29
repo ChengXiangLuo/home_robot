@@ -48,6 +48,7 @@ void MX_USART3_UART_Init(void);
 
 /* USER CODE BEGIN Prototypes */
 void u1_printf(uint8_t *TxBuffer);
+void u2_printf(uint8_t *TxBuffer);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
