@@ -114,7 +114,7 @@ void carMove2L(float v)
 	uint16_t pwm = v*k_V2PWM;
 	Frontal_left_run2forward(pwm);
 	Frontal_Right_run2back(pwm);
-	back_Right_run2back(pwm);
+	back_left_run2back(pwm);
 	back_Right_run2forward(pwm);
 }
 
@@ -132,7 +132,7 @@ void carRotate2L(float v)
 	uint16_t pwm = v*k_V2PWM;
 	Frontal_left_run2back(pwm);
 	Frontal_Right_run2forward(pwm);
-	back_Right_run2back(pwm);
+	back_left_run2back(pwm);
 	back_Right_run2forward(pwm);
 }
 

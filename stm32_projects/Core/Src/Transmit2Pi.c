@@ -16,7 +16,8 @@ uint8_t RxBuffer[30];//接收缓存
 uint8_t aRxBuffer_u2;
 uint8_t RxBuffer_u2[30];//uart2接收缓存
 
-uint8_t Page_temp; //串口屏此时页面 
+uint8_t hmi_is_OK = 0; //判断串口屏是否加载完成
+uint8_t Page_temp = 0; //串口屏此时页面 
 /**
  * @brief  小数转换成八位二进制数，小数精度0.1，范围±7.0
  * @param  num:要转化的数字
@@ -115,7 +116,7 @@ void dataFromPi_process(uint8_t *data)
 {
 //	char tx_text[20];
 	float velocity_x, velocity_y, velocity_z;
-	float joint1_angle,joint2_angle;
+	float joint1_angV,joint2_angV;
 	
 	uint8_t k=0;
 	while(RxBuffer[k++]!='{');
@@ -172,12 +173,12 @@ void dataFromPi_process(uint8_t *data)
 	//第一位为0x02 舵机处理
 	else if(data[k]==0x02)
 	{
-		joint1_angle = angle_b2d(data[k+1]);
-		joint2_angle = angle_b2d(data[k+2]);
-//		sprintf(tx_text,"j1:%.2f,j2:%.2f\r\n",joint1_angle,joint2_angle);
+		joint1_angV = (int)velocity_b2f(data[k+1]);
+		joint2_angV = (int)velocity_b2f(data[k+2]);
+//		sprintf(tx_text,"j1:%.2f,j2:%.2f\r\n",joint1_angV,joint2_angV);
 //		u1_printf((uint8_t *)tx_text);
-		joint1_cmd(joint1_angle);		
-		joint2_cmd(joint2_angle);
+		arm_AngV_cmd(joint1_angV,joint2_angV);
+
 	}
 	else if(data[k]==0x03)
 	{
@@ -223,7 +224,7 @@ void dataFromHMI_process(uint8_t *data)
 }
 
 /**
- * @brief 	串口回调函数，对树莓派串口，处理树莓派发送的数据
+ * @brief 	串口回调函数，处理树莓派发送的数据和串口的数据
  * @param 	句柄指针 *huart
  * @retval	无
  */
@@ -231,7 +232,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 {
     static uint8_t Uart1_Rx_Cnt = 0;
 		static uint8_t Uart2_Rx_Cnt = 0;
-		
+		// 树莓派
     if (huart == &huart1)
     {
         RxBuffer[++Uart1_Rx_Cnt] = aRxBuffer;   
@@ -247,7 +248,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 				
 				HAL_UART_Receive_IT(&huart1, (uint8_t *)&aRxBuffer, 1);
     }
-		
+		// 串口屏
 		else if (huart == &huart2)
     {
         RxBuffer_u2[++Uart2_Rx_Cnt] = aRxBuffer_u2;   

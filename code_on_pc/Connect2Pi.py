@@ -20,9 +20,20 @@ class _RecvImg:
         self.context = zmq.Context()        
         self.recv_socket = self.context.socket(zmq.PULL)
         self.recv_socket.bind(bind_str)  # 绑定到所有本地接口
-        
+    
+    def check_connection(self):
+        '''判断是否连接
+        '''
+        # 获取套接字的状态信息
+        status = self.recv_socket.getsockopt(zmq.EVENTS)
+        # 判断套接字是否成功连接
+        if status & zmq.POLLOUT:
+            return True
+        else:
+            return False
+
     def imgProcessing(self):
-        """收到树莓派发来的视频流后，解码恢复
+        """收到树莓派发来的视频流后，解码恢复S
 
         Returns:
             bool: 接收到为TRUE,否则为Flase
@@ -35,8 +46,14 @@ class _RecvImg:
             source = cv2.imdecode(npimg, 1) #将一维数组解码为图像source
             return True, source
         else:
-            return False
-
+            return False, None
+    # def imgProcessing(self):
+    #     frame = self.recv_socket.recv_string() #接收TCP传输过来的一帧视频图像数据
+    #     img = base64.b64decode(frame) #把数据进行base64解码后储存到内存img变量中
+    #     npimg = np.frombuffer(img, dtype=np.uint8) #把这段缓存解码成一维数组
+    #     source = cv2.imdecode(npimg, 1) #将一维数组解码为图像source
+    #     return True, source
+    
 class _SendCmd():
     def __init__(self,IP,port):
         """设置发送指令的IP和端口
@@ -55,17 +72,27 @@ class _SendCmd():
         self.send_socket = self.context.socket(zmq.PUSH)
         self.send_socket.bind(bind_str)
 
-       
-    def velocitySet(self,velocity_x,velocity_y,angle_z):
+    def check_connection(self):
+        '''判断是否连接
+        '''
+        # 获取套接字的状态信息
+        status = self.send_socket.getsockopt(zmq.EVENTS)
+        # 判断套接字是否成功连接
+        if status & zmq.POLLOUT:
+            return True
+        else:
+            return False
+        
+    def velocitySet(self,velocity_x,velocity_y,angular_z):
         """速度设置
         """
-        if velocity_x>5 or velocity_x<-5:
+        if velocity_x>8 or velocity_x<-8:
             velocity_x = 0
-        if velocity_y>5 or velocity_y<-5:
+        if velocity_y>8 or velocity_y<-8:
             velocity_y = 0
-        if angle_z>90 or angle_z<-90:
-            angle_z = 0
-        send_str = 'car:'+str(velocity_x)+','+str(velocity_y)+','+str(angle_z)
+        if angular_z>90 or angular_z<-90:
+            angular_z = 0
+        send_str = 'car:'+str(velocity_x)+','+str(velocity_y)+','+str(angular_z)
         self.send_socket.send_string(send_str)
         
 

@@ -42,6 +42,8 @@ def sendNumLimit():
     elif AngArm > 90:
         AngArm = 0
 
+
+
 class VideoViewer(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -60,9 +62,18 @@ class VideoViewer(QMainWindow):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.update_frame)
         self.timer.start(1)
+    
 
     def update_frame(self):
         global Vx, Vy, Angz, AngArm
+        # temp = re_img.check_connection()
+        # if temp:
+        #     print('re is ok')
+        # temp2 = se_cmd.check_connection()
+        # if temp2:
+        #     print('se is ok')
+
+
         ret, frame = re_img.imgProcessing()
         if ret:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)

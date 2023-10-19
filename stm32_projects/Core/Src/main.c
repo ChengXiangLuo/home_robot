@@ -65,24 +65,24 @@ void SystemClock_Config(void);
  */
 void run(void)
 {
-	HAL_Delay(100);
+	HAL_Delay(300);
 	// 判断当前用户选择的功能，并给树莓派发送
 	switch(Page_temp)	
 	{
 		case PageFeatures:
-			u1_printf("page:0");
+			u1_printf("page:0\r\n");
 			break;
 		case PagePcCtl:
-			u1_printf("page:1");
+			u1_printf("page:1\r\n");
 			break;
 		case PageTalk:
-			u1_printf("page:2");
+			u1_printf("page:2\r\n");
 			break;
 		case PageWatch:
-			u1_printf("page:3");
+			u1_printf("page:3\r\n");
 			break;
 		case PageDoctor:
-			u1_printf("page:4");
+			u1_printf("page:4\r\n");
 			break;
 	}
 }
@@ -127,7 +127,15 @@ int main(void)
 	my_uart_init();
 	CarMotor_init();
 	ArmCam_init();
-
+	
+	uint8_t i=0;
+	HAL_Delay(1000);
+	while(i<30)	//等待30s后发送进入选择界面命令
+	{
+		HAL_Delay(1000);
+		i++;
+	}
+	u2_printf("page features\xff\xff\xff");
   /* USER CODE END 2 */
 
   /* Infinite loop */
