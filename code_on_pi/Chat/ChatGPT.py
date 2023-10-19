@@ -10,7 +10,7 @@ class _ChatGPT:
 
     # 调用chatgpt的API
     def ask_gpt(self):
-        openai.api_key = "sk-rBwKRZEfIUQmaQAX5F15P4ky7MWXThVd2hkQ7X3owRymiW6T"
+        openai.api_key = ""
         openai.api_base = "https://api.chatanywhere.com.cn/v1"
         rsp = openai.ChatCompletion.create(
           model="gpt-3.5-turbo",

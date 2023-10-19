@@ -14,7 +14,7 @@ def get_file_content(file_path):
 
 class _Audio2Text:
     def __init__(self,silence_threshold_strat = 2500 ,silence_threshold_stop = 300,
-                 APP_ID='37949396',API_KEY = '7wQ5ft9RSVSNYo28kjoTOIap',SECRET_KEY = 'lypMANN29ym4OowOWifw3g20fL7SF21g') :
+                 APP_ID='',API_KEY = '',SECRET_KEY = '') :
         self.silence_threshold_strat = silence_threshold_strat
         self.silence_threshold_stop = silence_threshold_stop    
         self.p = pyaudio.PyAudio()

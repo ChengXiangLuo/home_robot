@@ -6,7 +6,7 @@ import os
 #接口文档：https://cloud.baidu.com/product/speech/tts_online
 
 class _Text2Audio:
-    def __init__(self,APP_ID='37949396',API_KEY = '7wQ5ft9RSVSNYo28kjoTOIap',SECRET_KEY = 'lypMANN29ym4OowOWifw3g20fL7SF21g'):
+    def __init__(self,APP_ID='',API_KEY = '',SECRET_KEY = ''):
         self.APP_ID = APP_ID
         self.API_KEY = API_KEY
         self.SECRET_KEY = SECRET_KEY
@@ -39,7 +39,7 @@ def play_mp3(mp3_file):
 # 测试
 def main():
     playAudio = _Text2Audio()
-    playAudio.getAudio("八嘎呀卢")  
+    playAudio.getAudio("你好")  
   
 
 if __name__ == '__main__':
